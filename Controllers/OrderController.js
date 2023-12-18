@@ -202,3 +202,72 @@ module.exports.DELETE_ORDER = async (req, res) => {
         console.log('error in delete order controller', error);
     }
 }
+
+module.exports.GET_USER_ORDER_BY_ID = async (req, res) => {
+    const userId = req.params.userId;
+    const arr = [];
+    try {
+        await User.findById(userId)
+            .exec()
+            .then(async (userResponse) => {
+                if (userResponse) {
+                    await Order.find({ userId: userId, deleteOrder: false })
+                        .populate('userId', '_id firstName lastName phoneNumber email')
+                        .exec()
+                        .then((orderResponse) => {
+                            if (orderResponse.length > 0) {
+                                for (let i = 0; i < orderResponse.length; i++) {
+                                    const orderProduct = [];
+                                    const orderQuantity = [];
+                                    const orderPrice = [];
+                                    const order = orderResponse?.
+                                        filter((item) => item?.orderId === orderResponse[i]?.orderId);
+
+                                    order.map((orderItem) => {
+                                        let product = Products.find((item) => item?.id === orderItem?.productId);
+                                        orderProduct.push(product);
+                                        orderQuantity.push(orderItem.quantity);
+                                        orderPrice.push(parseInt(product.productPrice.split(' ')[1]));
+                                    })
+                                    let obj = {
+                                        orderId: orderResponse[i]?.orderId,
+                                        orderInvoice: orderResponse[i]?.orderInvoice,
+                                        product: orderProduct,
+                                        quantity: orderQuantity,
+                                        productPrice: orderPrice,
+                                        total: (orderPrice.map((v, i) => v * orderQuantity[i]).reduce((x, y) => x + y, 0)),
+                                        username: orderResponse[i]?.userId?.firstName + " " + orderResponse[i]?.userId?.lastName,
+                                        phoneNumber: orderResponse[i]?.userId?.phoneNumber,
+                                        email: orderResponse[i]?.userId?.email,
+                                        address: orderResponse[i]?.address,
+                                        landMark: orderResponse[i]?.landMark,
+                                        city: orderResponse[i]?.city,
+                                        postalCode: orderResponse[i]?.postalCode,
+                                        orderDate: dateConverter(orderResponse[i]?.createdAt),
+                                        orderDelivered: orderResponse[i]?.delivered,
+                                        deleteOrder: orderResponse[i]?.deleteOrder
+                                    }
+
+                                    arr.push(obj);
+                                }
+                                const userOrders = [...new Map(arr.map(v => [v.orderId, v])).values()];
+                                res.status(200).send(userOrders);
+                            }
+                            else {
+                                res.status(200).send({
+                                    message: "No users orders!"
+                                })
+                            }
+                        })
+                }
+                else {
+                    res.status(404).send({
+                        message: "User not found!"
+                    })
+                }
+            })
+    }
+    catch (error) {
+        console.log('error in user order by id', error);
+    }
+}

@@ -47,7 +47,7 @@ module.exports.GET_USER_CART = (async (req, res) => {
                         let product = data.find((item) => item.id === cartResponse[i]?.productId);
                         let obj = {
                             _id: cartResponse[i]?._id,
-                            productId:product?.id,
+                            productId: product?.id,
                             productName: product?.productName,
                             productImage: product?.productImage,
                             productPrice: product?.productPrice,
@@ -65,7 +65,8 @@ module.exports.GET_USER_CART = (async (req, res) => {
 })
 
 module.exports.ADD_QUANTITY_OF_CART = async (req, res) => {
-    const cartId = req.params.cartId;    
+    const cartId = req.params.cartId;
+    if (cartId === undefined || cartId === null || cartId === "undefined") return;
     try {
         await Cart.findByIdAndUpdate(cartId, { $inc: { 'quantity': 1 } }, { new: true })
             .exec()
