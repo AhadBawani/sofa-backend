@@ -227,7 +227,7 @@ module.exports.GET_USER_ORDER_BY_ID = async (req, res) => {
                                         let product = Products.find((item) => item?.id === orderItem?.productId);
                                         orderProduct.push(product);
                                         orderQuantity.push(orderItem.quantity);
-                                        orderPrice.push(parseInt(product.productPrice.split(' ')[1]));
+                                        orderPrice.push(parseInt(product.productPrice));
                                     })
                                     let obj = {
                                         orderId: orderResponse[i]?.orderId,
