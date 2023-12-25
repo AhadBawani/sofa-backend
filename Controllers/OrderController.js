@@ -17,8 +17,7 @@ module.exports.PLACE_ORDER = async (req, res) => {
                     Order.findOne({}, {}, { sort: { '_id': -1 } }).select('orderId orderInvoice')
                         .exec()
                         .then((orderResponse) => {
-                            if (orderResponse) {
-                                console.log(orderResponse);
+                            if (orderResponse) {                                
                                 const orderInvoice = orderResponse?.orderInvoice?.toString().split('-');
                                 const increInvoice = (parseInt(orderInvoice[1]) + 1).toString().padStart(4, '0');
                                 orderId = (orderResponse?.orderId + 1);
@@ -83,8 +82,7 @@ module.exports.PLACE_ORDER = async (req, res) => {
 
 module.exports.GET_ALL_ORDER = async (req, res) => {
     const userId = req.params.userId;
-    const arr = [];
-    console.log(userId);
+    const arr = [];    
     try {
         await verifyUser(userId)
             .then(async (verificationResponse) => {
@@ -105,7 +103,7 @@ module.exports.GET_ALL_ORDER = async (req, res) => {
                                         let product = Products.find((item) => item?.id === orderItem?.productId);
                                         orderProduct.push(product);
                                         orderQuantity.push(orderItem.quantity);
-                                        orderPrice.push(parseInt(product.productPrice.split(' ')[1]));
+                                        orderPrice.push(product.productPrice);
                                     })
                                     let obj = {
                                         orderId: orderResponse[i]?.orderId,
